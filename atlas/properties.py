@@ -23,7 +23,7 @@ class Integer(object):
     def __init__(self, value):
         self.value = long(value)
     def to_python(self):
-        return self.value
+        return int(self.value)
     def to_database(self):
         return self.value
 

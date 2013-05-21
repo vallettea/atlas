@@ -18,7 +18,7 @@ class Atlas(object):
         #execute_query("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 
         if batchmode:
-            execute_query("bg = new BatchGraph(g,VertexIDType.STRING,1000) ; bg.setVertexIdKey('vid');")   
+            execute_query("bg = new BatchGraph(g, VertexIDType.STRING, 1000) ; bg.setVertexIdKey('vid');")   
 
     def execute(self, query, params = {}):
         
@@ -53,6 +53,22 @@ class Vertex(object):
         content = self.handler.execute("g.addVertex(null, %s)" % property_list)
         self._id = content["_id"]
 
+    def outV(self, label = ""):
+        if label != "":
+            label = "'" + label + "'"
+        contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
+        vertices = []
+        for content in contents:
+            properties = {}
+            for key, value in content["_properties"].items():
+                prop_type = key.split("_as_")[-1]
+                Prop = atlas_prop.label_type[prop_type]
+                v = Prop(value).to_python()
+                properties[key] = v            
+            vertex = Vertex(self.handler, properties)
+            vertex._id = content["_id"]
+            vertices += [vertex]
+        return vertices
 
 
 def get_vertex(handler, key, value):
