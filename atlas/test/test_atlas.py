@@ -64,4 +64,5 @@ e = Edge(atlas, v1, v4, "likes", properties = {"how_much_as_integer" : 2})
 e.save()
 # getting all outgoing vertices
 outs = v1.outV("likes")
+ins = v4.inV()
 

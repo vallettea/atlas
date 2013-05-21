@@ -70,6 +70,23 @@ class Vertex(object):
             vertices += [vertex]
         return vertices
 
+    def inV(self, label = ""):
+        if label != "":
+            label = "'" + label + "'"
+        contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
+        vertices = []
+        for content in contents:
+            properties = {}
+            for key, value in content["_properties"].items():
+                prop_type = key.split("_as_")[-1]
+                Prop = atlas_prop.label_type[prop_type]
+                v = Prop(value).to_python()
+                properties[key] = v            
+            vertex = Vertex(self.handler, properties)
+            vertex._id = content["_id"]
+            vertices += [vertex]
+        return vertices
+
 
 def get_vertex(handler, key, value):
     content = handler.execute("g.V('%s', '%s')" % (key, str(value)))
