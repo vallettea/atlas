@@ -2,6 +2,8 @@ import logging
 
 from rexpro import RexProConnection
 
+from atlas.properties import *
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,11 +22,11 @@ class Atlas(object):
 
     def execute(self, query, params = {}):
         
-        content = self.conn.execute(query, params, isolate = False)
         print "=========================================================================="
         print query
         print params
         print "=========================================================================="
+        content = self.conn.execute(query, params, isolate = False)
         print "--------->"
         print content
         print "=========================================================================="
@@ -53,6 +55,26 @@ class Atlas(object):
 
         logger.info(content)
         return content
+
+
+class Vertex(object):
+    def __init__(self, handler, properties = {}, functions = {}):
+        self.handler = handler
+        self.properties = properties
+        self.functions = functions
+        self.save()
+
+
+    def save(self):
+        property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in self.properties.items()]) + "]"
+        self.handler.execute("g.addVertex(null, %s)" % property_list)
+
+
+
+
+
+
+
 
 
 
