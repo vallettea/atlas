@@ -1,7 +1,7 @@
 import datetime
 
-from atlas.base import Atlas, Vertex
-import atlas.properties as prop
+from atlas.base import Atlas, Vertex, get_vertex
+
 # from atlas.properties import Text, Decimal
 
 
@@ -15,14 +15,18 @@ atlas = Atlas("graph", "localhost", batchmode = False)
 
 
 # creating a vertice with properties
-v1 = Vertex(atlas, properties = {"name" : prop.String("toto"),
-								 "age" : prop.Integer(2), 
-							     "registered" : prop.DateTime(datetime.datetime.now()),
-							     "registered_date" : prop.Date(datetime.datetime.now().date()),
-							     "registered_time" : prop.Time(datetime.datetime.now().time()),
-							     "registered_since" : prop.TimeDelta(datetime.datetime(2013, 5, 21, 13, 52, 41, 176589)-datetime.datetime.now()),
-							     "uuid" : prop.UUID(),
-							     "male" : prop.Boolean(True),
-							     "income" : prop.Float(39009888.3222),
-							     "rate" : prop.Decimal(3.2)
+v1 = Vertex(atlas, properties = {"name_as_string" : "toto",
+								 "age_as_integer" : 2, 
+							     "registered_as_datetime" : datetime.datetime.now(),
+							     "registered_date_as_date" : datetime.datetime.now().date(),
+							     "registered_time_as_time" : datetime.datetime.now().time(),
+							     "registered_since_as_timedelta" : datetime.datetime(2013, 5, 21, 13, 52, 41, 176589) - datetime.datetime.now(),
+							     "uuid_as_uuid" : None,
+							     "male_as_boolean" : True,
+							     "income_as_float" : 39009888.3222,
+							     "rate_as_decimal" : 3.2
 							     })
+v1.save()
+
+# querying a vertex and fill the object
+v2 = get_vertex(atlas, "name_as_string", "toto")

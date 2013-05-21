@@ -127,3 +127,20 @@ class Decimal(object):
 
     def to_database(self):
         return str(self.value)
+
+
+# dictionnay that makes the correspondance
+
+label_type = {"string" : String,
+              "text" : Text,
+              "integer" : Integer,
+              "datetime" : DateTime,
+              "date" : Date,
+              "time" : Time,
+              "timedelta" : TimeDelta,
+              "uuid" : UUID,
+              "boolean" : Boolean,
+              "double" : Double,
+              "float" : Float,
+              "decimal" : Decimal
+              }

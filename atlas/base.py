@@ -2,7 +2,7 @@ import logging
 
 from rexpro import RexProConnection
 
-from atlas.properties import *
+from atlas import properties as atlas_prop
 
 logger = logging.getLogger(__name__)
 
@@ -31,44 +31,47 @@ class Atlas(object):
         print content
         print "=========================================================================="
 
-        if not isinstance(content, list):
-            content = [content]
-
-        to_integer = ['_id', '_inV', '_outV']
-
-        for elem in content:
-            if isinstance(elem, dict):
-                if elem.has_key('_id') and elem['_type'] == 'vertex':
-                    elem['_id'] = int(elem['_id'])
-                # if elem.has_key('_inV') and elem['_type'] == 'edge':
-                #     elem['_inV'] = int(elem['_inV'])
-                # if elem.has_key('_outV') and elem['_type'] == 'edge':
-                #     elem['_outV'] = int(elem['_outV'])        
-
-        # because rexpro puts thing under a property dictionnary
-        for elem in content:
-            if isinstance(elem, dict):
-                if elem.has_key('_properties'):
-                    elem.update(elem['_properties'])
-                    del elem['_properties']
-
-
-        logger.info(content)
         return content
 
 
 class Vertex(object):
-    def __init__(self, handler, properties = {}, functions = {}):
+    def __init__(self, handler, properties = {}):
         self.handler = handler
         self.properties = properties
-        self.functions = functions
-        self.save()
-
+        self._id = None
 
     def save(self):
-        property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in self.properties.items()]) + "]"
-        self.handler.execute("g.addVertex(null, %s)" % property_list)
+        # make properties from given input, the type is labeled after _as_
+        typed_properties = {}
+        for key, value in self.properties.items():
+            prop_type = key.split("_as_")[-1]
+            Prop = atlas_prop.label_type[prop_type]
+            v = Prop(value)
+            typed_properties[key] = v
 
+        property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
+        content = self.handler.execute("g.addVertex(null, %s)" % property_list)
+        self._id = int(content["_id"])
+
+
+
+def get_vertex(handler, key, value):
+    content = handler.execute("g.V('%s', '%s')" % (key, str(value)))
+    if len(content) > 1:
+        print "More than one vertex found."
+    elif len(content) == 0:
+        print "No vertex found."
+    else:
+        content = content[0]
+        properties = {}
+        for key, value in content["_properties"].items():
+            prop_type = key.split("_as_")[-1]
+            Prop = atlas_prop.label_type[prop_type]
+            v = Prop(value).to_python()
+            properties[key] = v            
+        vertex = Vertex(handler, properties)
+        vertex._id = content["_id"]
+        return vertex
 
 
 
