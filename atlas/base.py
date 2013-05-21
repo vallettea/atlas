@@ -51,7 +51,7 @@ class Vertex(object):
 
         property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
         content = self.handler.execute("g.addVertex(null, %s)" % property_list)
-        self._id = int(content["_id"])
+        self._id = content["_id"]
 
 
 
@@ -73,7 +73,26 @@ def get_vertex(handler, key, value):
         vertex._id = content["_id"]
         return vertex
 
+class Edge(object):
+    def __init__(self, handler, v1, v2, label, properties = {}):
+        self.handler = handler
+        self.v1 = v1
+        self.v2 = v2
+        self.label = label
+        self.properties = properties
+        self._id = None
 
+    def save(self):
+        typed_properties = {}
+        for key, value in self.properties.items():
+            prop_type = key.split("_as_")[-1]
+            Prop = atlas_prop.label_type[prop_type]
+            v = Prop(value)
+            typed_properties[key] = v
+        property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
+        content = self.handler.execute("v1 = g.v(%s)\n v2 = g.v(%s)\n g.addEdge(null, v1, v2, '%s', %s)"
+                                         % (self.v1._id, self.v2._id, self.label, property_list))
+        self._id = content["_id"]
 
 
 
