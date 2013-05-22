@@ -1,5 +1,6 @@
 # TODO
 -check if vertex exists before adding
+-implement batch mode
 
 
 # Why:

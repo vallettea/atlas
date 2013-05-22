@@ -8,8 +8,8 @@ from uuid import UUID as _UUID
 class String(object):
 
     def __init__(self, value):
-        if isinstance(value, unicode):
-            value = value.encode(self.encoding)
+        # if isinstance(value, unicode):
+        #     value = value.encode(self.encoding)
         self.value = value
     def to_python(self):
         return self.value
