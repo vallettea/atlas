@@ -4,34 +4,36 @@ import time as time_
 from uuid import uuid1, uuid4
 from uuid import UUID as _UUID
 
-
-class String(object):
-
+class Property(object):
     def __init__(self, value):
-        # if isinstance(value, unicode):
-        #     value = value.encode(self.encoding)
         self.value = value
+
     def to_python(self):
         return self.value
+
     def to_database(self):
-        return "'" + self.value + "'"
+        return self.value
+
+
+
+class String(Property):
+    pass
 
 Text = String
 
-class Integer(object):
+class Integer(Property):
 
     def __init__(self, value):
-        self.value = long(value)
+        if isinstance(value, Integer):
+            self.value = value
+        else:
+            self.value = long(value)
     def to_python(self):
         return int(self.value)
-    def to_database(self):
-        return self.value
 
 
-class DateTime(object):
+class DateTime(Property):
 
-    def __init__(self, value):
-        self.value = value
     def to_python(self):
         return datetime.fromtimestamp(float(self.value))
 
@@ -41,10 +43,7 @@ class DateTime(object):
         tmp = tmp + float(self.value.microsecond) / 1000000
         return tmp
 
-class Date(object):
-
-    def __init__(self, value):
-        self.value = value
+class Date(Property):
 
     def to_python(self):
         return date.fromordinal(self.value)
@@ -53,10 +52,7 @@ class Date(object):
         tmp = self.value.toordinal()
         return long(tmp)
 
-class Time(object):
-
-    def __init__(self, value):
-        self.value = value
+class Time(Property):
 
     def to_python(self):
         return datetime.fromtimestamp(float(self.value)).time()
@@ -69,10 +65,7 @@ class Time(object):
         tmp = tmp + float(self.value.microsecond) / 1000000
         return tmp
 
-class TimeDelta(object):
-
-    def __init__(self, value):
-        self.value = value
+class TimeDelta(Property):
 
     def to_python(self):
         return timedelta(seconds = float(self.value))
@@ -81,7 +74,7 @@ class TimeDelta(object):
         tmp = self.value.total_seconds()
         return tmp
 
-class UUID(object):
+class UUID(Property):
     def __init__(self, value = None):
         if value == None:
             value = str(uuid4())
@@ -91,12 +84,10 @@ class UUID(object):
         return str(self.value)
 
     def to_database(self):
-        return "'" + str(self.value) + "'"
+        return str(self.value)
 
 
-class Boolean(object):
-    def __init__(self, value):
-        self.value = value
+class Boolean(Property):
 
     def to_python(self):
         return bool(self.value)
@@ -105,10 +96,7 @@ class Boolean(object):
         return int(self.value)
 
 
-class Double(object):
-
-    def __init__(self, value):
-        self.value = value
+class Double(Property):
 
     def to_python(self):
         return float(self.value)
@@ -118,9 +106,7 @@ class Double(object):
 
 Float = Double
 
-class Decimal(object):
-    def __init__(self, value):
-        self.value = value
+class Decimal(Property):
 
     def to_python(self):
         return D(self.value)
