@@ -4,7 +4,7 @@ from rexpro import RexProConnection
 
 from atlas import properties as atlas_prop
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("root")
 
 
 class Atlas(object):
@@ -15,22 +15,21 @@ class Atlas(object):
         self.batchmode = batchmode
         self.conn = RexProConnection(hostname, 8184, graph_name)
 
-        #execute_query("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
+        #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 
-        if batchmode:
-            execute_query("bg = new BatchGraph(g, VertexIDType.STRING, 1000) ; bg.setVertexIdKey('vid');")
+        if self.batchmode:
+            self.execute("bg = new BatchGraph(g, VertexIDType.STRING, 1000) ;")
 
     def execute(self, query, params = {}):
-        try:
-            content = self.conn.execute(query, params, isolate = False, transaction = False)
-        except:
-            logger.info("==========================================================================")
-            logger.info(query)
-            logger.info(params)
-            logger.info("==========================================================================")
-            logger.info("--------->")
-            logger.info(content)
-            logger.info("==========================================================================")
+        content = self.conn.execute(query, params, isolate = False, transaction = False)
+
+        # logger.info("==========================================================================")
+        # logger.info(query)
+        # logger.info(params)
+        # logger.info("==========================================================================")
+        # logger.info("--------->")
+        # logger.info(content)
+        # logger.info("==========================================================================")
 
         return content
 
@@ -50,10 +49,12 @@ class Vertex(object):
         self.properties = properties
         self._id = None
 
-    def save(self):
+    def save(self, vertex_id = "null"):
         typed_properties = make_prop(self.properties)
-        property_list = "[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
-        content = self.handler.execute("g.addVertex(null, %s)" % property_list)
+        property_list = ",[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
+        if property_list == ",[]":
+            property_list = ""
+        content = self.handler.execute("g.addVertex(null %s)" % property_list)
         self._id = content["_id"]
 
     def outV(self, label = ""):
