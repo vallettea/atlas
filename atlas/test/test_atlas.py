@@ -94,8 +94,5 @@ def add_nodes(n, handler):
 from timeit import Timer
 t = Timer(lambda: add_nodes(5000, atlas))
 print t.timeit(number=1)
-# adding 500 nodes in batchmode
-batlas = Atlas("graph", "localhost", batchmode = True)
-t = Timer(lambda: add_nodes(5000, batlas))
-print t.timeit(number=1)
+
 
