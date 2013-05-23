@@ -61,6 +61,12 @@ class Vertex(object):
         params = {k : v.to_database() for k,v in self.properties.items()}
         content = self.handler.execute(self.save_query, params)
         self._id = content["_id"]
+        return self
+
+    def execute(self, script, params):
+        params = {"_id" : self._id}
+        content = self.handler.execute(script, params)
+        return content
 
     def outV(self, label = ""):
         if label != "":
@@ -119,6 +125,7 @@ class Edge(object):
         params.update({k : v.to_database() for k,v in self.properties.items()})
         content = self.handler.execute(self.save_query, params)
         self._id = content["_id"]
+        return self
 
 
 

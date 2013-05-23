@@ -1,6 +1,6 @@
 # TODO
 -check if vertex exists before adding
--implement functions
+-implement functions for repetition calls
 
 
 # Why:
