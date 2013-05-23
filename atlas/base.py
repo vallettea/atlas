@@ -46,15 +46,13 @@ def make_prop(properties):
 class Vertex(object):
     def __init__(self, handler, properties = {}):
         self.handler = handler
-        self.properties = properties
+        self.properties = make_prop(properties)
+        self.save_query = "g.addVertex(null, [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "])"
         self._id = None
 
-    def save(self, vertex_id = "null"):
-        typed_properties = make_prop(self.properties)
-        property_list = ",[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
-        if property_list == ",[]":
-            property_list = ""
-        content = self.handler.execute("g.addVertex(null %s)" % property_list)
+    def save(self):
+        params = {k : v.to_database() for k,v in self.properties.items()}
+        content = self.handler.execute(self.save_query, params)
         self._id = content["_id"]
 
     def outV(self, label = ""):

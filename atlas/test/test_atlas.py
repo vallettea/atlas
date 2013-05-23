@@ -79,18 +79,18 @@ def add_nodes(n, handler):
 	for i in range(n):
 		v = Vertex(handler, properties = {
 				"name_as_string" : str(i),
-				# "age_as_integer" : 9,
-				# "registered_as_datetime" : datetime.datetime.now(),
-				# "registered_date_as_date" : datetime.datetime.now().date(),
-				# "registered_time_as_time" : datetime.datetime.now().time(),
-				# "registered_since_as_timedelta" : datetime.datetime(2013, 5, 21, 13, 52, 41, 176589) - datetime.datetime.now(),
-				# "uuid_as_uuid" : None,
-				# "male_as_boolean" : True,
-				# "income_as_float" : 39099888.3222,
-				# "rate_as_decimal" : 3.8
+				"age_as_integer" : 9,
+				"registered_as_datetime" : datetime.datetime.now(),
+				"registered_date_as_date" : datetime.datetime.now().date(),
+				"registered_time_as_time" : datetime.datetime.now().time(),
+				"registered_since_as_timedelta" : datetime.datetime(2013, 5, 21, 13, 52, 41, 176589) - datetime.datetime.now(),
+				"uuid_as_uuid" : None,
+				"male_as_boolean" : True,
+				"income_as_float" : 39099888.3222,
+				"rate_as_decimal" : 3.8
 				})
-		v.save(str(i))
-# adding 500 nodes in normal way
+		v.save()
+# adding 5000 nodes in normal way
 from timeit import Timer
 t = Timer(lambda: add_nodes(5000, atlas))
 print t.timeit(number=1)
