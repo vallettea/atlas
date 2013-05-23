@@ -78,7 +78,7 @@ import timeit
 def add_nodes(n, handler):
 	for i in range(n):
 		v = Vertex(handler, properties = {
-				# "name_as_string" : str(i),
+				"name_as_string" : str(i),
 				# "age_as_integer" : 9,
 				# "registered_as_datetime" : datetime.datetime.now(),
 				# "registered_date_as_date" : datetime.datetime.now().date(),
