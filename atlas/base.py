@@ -99,19 +99,15 @@ class Edge(object):
         self.v1 = v1
         self.v2 = v2
         self.label = label
-        self.properties = properties
+        self.properties = make_prop(properties)
+        self.save_query = "v1 = g.v(v1_id); v2 = g.v(v2_id); g.addEdge(null, v1, v2, label, [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "])"
         self._id = None
 
     def save(self):
-        typed_properties = make_prop(self.properties)
-        property_list = ",[" + ", ".join([k + ":" + str(v.to_database()) for k, v in typed_properties.items()]) + "]"
-        if property_list == ",[]":
-            property_list = ""
-        content = self.handler.execute("v1 = g.v(%s)\n v2 = g.v(%s)\n g.addEdge(null, v1, v2, '%s' %s)"
-                                         % (self.v1._id, self.v2._id, self.label, property_list))
+        params = {'v1_id' : self.v1._id, 'v2_id' : self.v2._id, 'label' : self.label}
+        params.update({k : v.to_database() for k,v in self.properties.items()})
+        content = self.handler.execute(self.save_query, params)
         self._id = content["_id"]
-
-
 
 
 

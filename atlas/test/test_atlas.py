@@ -75,8 +75,10 @@ atlas = Atlas("graph", "localhost", batchmode = False)
 
 # test batch mode
 import timeit
-def add_nodes(n, handler):
-	for i in range(n):
+from random import choice
+def add_graph(nn, ne, handler):
+	nodes = []
+	for i in range(nn):
 		v = Vertex(handler, properties = {
 				"name_as_string" : str(i),
 				"age_as_integer" : 9,
@@ -90,9 +92,17 @@ def add_nodes(n, handler):
 				"rate_as_decimal" : 3.8
 				})
 		v.save()
-# adding 5000 nodes in normal way
+		nodes += [v]
+	for i in range(ne):
+		v1 = choice(nodes)
+		v2 = choice(nodes)
+		while v2 == v1:
+			v2 = choice(nodes)
+		e = Edge(handler, v1, v2, "likes", properties = {"how_much_as_integer" : 2})
+		e.save()
+# adding 5000 nodes and 5000 edges
 from timeit import Timer
-t = Timer(lambda: add_nodes(5000, atlas))
+t = Timer(lambda: add_graph(5000, 5000, atlas))
 print t.timeit(number=1)
 
 
