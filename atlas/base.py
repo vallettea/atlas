@@ -4,7 +4,7 @@ from rexpro import RexProConnection
 
 from atlas import properties as atlas_prop
 
-logger = logging.getLogger("root")
+logger = logging.getLogger("atlas")
 
 
 class Atlas(object):
@@ -21,15 +21,18 @@ class Atlas(object):
             self.execute("bg = new BatchGraph(g, VertexIDType.STRING, 1000) ;")
 
     def execute(self, query, params = {}):
-        content = self.conn.execute(query, params, isolate = False, transaction = False)
 
-        # logger.info("==========================================================================")
-        # logger.info(query)
-        # logger.info(params)
-        # logger.info("==========================================================================")
-        # logger.info("--------->")
-        # logger.info(content)
-        # logger.info("==========================================================================")
+        try:
+            content = self.conn.execute(query, params, isolate = False, transaction = False)
+        except:
+            logger.info("==========================================================================")
+            logger.info(query)
+            logger.info(params)
+            logger.info("==========================================================================")
+            
+            logger.info("--------->")
+            logger.info(content)
+            logger.info("==========================================================================")
 
         return content
 
@@ -47,7 +50,11 @@ class Vertex(object):
     def __init__(self, handler, properties = {}):
         self.handler = handler
         self.properties = make_prop(properties)
-        self.save_query = "g.addVertex(null, [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "])"
+        if len(properties.keys()) > 0:
+            prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
+        else:
+            prop_string = ""
+        self.save_query = "g.addVertex(null %s)" % prop_string
         self._id = None
 
     def save(self):
@@ -61,7 +68,7 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            vertex = Vertex(self.handler, make_prop(content["_properties"]))
+            vertex = Vertex(self.handler, content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
         return vertices
@@ -72,7 +79,7 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            vertex = Vertex(self.handler, make_prop(content["_properties"]))
+            vertex = Vertex(self.handler, content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
         return vertices
@@ -100,7 +107,11 @@ class Edge(object):
         self.v2 = v2
         self.label = label
         self.properties = make_prop(properties)
-        self.save_query = "v1 = g.v(v1_id); v2 = g.v(v2_id); g.addEdge(null, v1, v2, label, [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "])"
+        if len(properties.keys()) > 0:
+            prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
+        else:
+            prop_string = ""
+        self.save_query = "v1 = g.v(v1_id); v2 = g.v(v2_id); g.addEdge(null, v1, v2, label %s)" % prop_string
         self._id = None
 
     def save(self):

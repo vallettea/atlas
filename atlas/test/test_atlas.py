@@ -2,7 +2,7 @@ import datetime,  logging
 
 from atlas.base import Atlas, Vertex, Edge, get_vertex
 
-logger = logging.getLogger('root')
+logger = logging.getLogger('atlas')
 formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 handler = logging.FileHandler("/Users/vallette/Desktop/log_%s.log" % "test_atlas")
 handler.setFormatter(formatter)
@@ -73,7 +73,7 @@ atlas = Atlas("graph", "localhost", batchmode = False)
 # ins = v4.inV()
 
 
-# test batch mode
+# test performance
 import timeit
 from random import choice
 def add_graph(nn, ne, handler):
