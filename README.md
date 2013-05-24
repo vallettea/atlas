@@ -22,7 +22,6 @@ Atlas is different from thunderdome in various ways:
 -check if vertex exists before adding
 -implement functions for repetition calls
 - clarify the difference between long and integers
-- check why vertex.label return all properties
 - vertex.as_dict() should return properties in a readable way (use class representation as in django)
 
 

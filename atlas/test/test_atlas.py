@@ -34,8 +34,7 @@ v1 = Vertex(atlas, label="mylab", properties = {"name_as_string" : "toto",
 				})
 v1.save()
 logger.info("querying a vertex and fill the object")
-v= get_vertex(atlas, "name_as_string", "toto")
-sys.exit(0)
+get_vertex(atlas, "name_as_string", "toto")
 get_vertex(atlas, "age_as_integer", 2)
 
 

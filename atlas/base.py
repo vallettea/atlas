@@ -77,7 +77,8 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            vertex = Vertex(self.handler, content["_properties"])
+            label = content["_properties"].pop("label_as_string")
+            vertex = Vertex(self.handler, label = label, properties = content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
         return vertices
@@ -88,7 +89,8 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            vertex = Vertex(self.handler, content["_properties"])
+            label = content["_properties"].pop("label_as_string")
+            vertex = Vertex(self.handler, label = label, properties = content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
         return vertices
