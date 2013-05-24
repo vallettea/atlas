@@ -67,7 +67,7 @@ class Vertex(object):
         return self
 
     def execute(self, script, params):
-        params = {"_id" : self._id}
+        params.update({"_id" : self._id})
         content = self.handler.execute(script, params)
         return content
 

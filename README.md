@@ -12,6 +12,7 @@ Atlas is different from thunderdome in various ways:
 + less verbose because elements are defined in a generic way
 + much faster (because thunderdome uses REST)
 + is much closer to the structure of gremlin
++ gremlin queries can be written directly (no need of groovy scripts)
 - has no save strategies (yet)
 - has not yet a proper transactional protocol
 - properties should respect a *name_of_variable***_as_***type* syntax
@@ -21,6 +22,8 @@ Atlas is different from thunderdome in various ways:
 -check if vertex exists before adding
 -implement functions for repetition calls
 - clarify the difference between long and integers
+- check why vertex.label return all properties
+- vertex.as_dict() should return properties in a readable way (use class representation as in django)
 
 
 

@@ -21,7 +21,7 @@ atlas.execute("g.V('vid', 'stephen')")
 
 
 logger.info("creating a vertice with properties")
-v1 = Vertex(atlas, properties = {"name_as_string" : "toto",
+v1 = Vertex(atlas, label="mylab", properties = {"name_as_string" : "toto",
 				"age_as_integer" : 2,
 				"registered_as_datetime" : datetime.datetime.now(),
 				"registered_date_as_date" : datetime.datetime.now().date(),
@@ -33,7 +33,6 @@ v1 = Vertex(atlas, properties = {"name_as_string" : "toto",
 				"rate_as_decimal" : 3.2
 				})
 v1.save()
-
 logger.info("querying a vertex and fill the object")
 get_vertex(atlas, "name_as_string", "toto")
 get_vertex(atlas, "age_as_integer", 2)
