@@ -47,8 +47,11 @@ def make_prop(properties):
         return typed_properties
 
 class Vertex(object):
-    def __init__(self, handler, properties = {}):
+    def __init__(self, handler, label = None, properties = {}):
         self.handler = handler
+        self.label = label
+        if label:
+            properties.update({"label_as_string" : label})
         self.properties = make_prop(properties)
         if len(properties.keys()) > 0:
             prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
@@ -92,7 +95,7 @@ class Vertex(object):
 
 
 def get_vertex(handler, key, value):
-    if isinstance(value, str):
+    if isinstance(value, basestring):
         content = handler.execute("g.V('%s', '%s')" % (key, value))
     else:
         content = handler.execute("g.V('%s', %s)" % (key, str(value)))

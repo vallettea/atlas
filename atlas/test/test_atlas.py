@@ -1,4 +1,4 @@
-import datetime,  logging
+import datetime,  logging, sys
 
 from atlas.base import Atlas, Vertex, Edge, get_vertex
 
@@ -13,7 +13,8 @@ logger.info("Creating atlas")
 atlas = Atlas("graph", "localhost", batchmode = False)
 
 logger.info("sending gremlin messages:")
-atlas.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
+atlas.execute("g.makeType().name('name_as_string').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
+atlas.execute("g.makeType().name('age_as_integer').dataType(Long.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 atlas.execute("g.addVertex(null,[vid:'stephen'])")
 
 atlas.execute("g.V('vid', 'stephen')")
@@ -34,7 +35,10 @@ v1 = Vertex(atlas, properties = {"name_as_string" : "toto",
 v1.save()
 
 logger.info("querying a vertex and fill the object")
-v2 = get_vertex(atlas, "name_as_string", "toto")
+get_vertex(atlas, "name_as_string", "toto")
+get_vertex(atlas, "age_as_integer", 2)
+
+
 v3 = Vertex(atlas, properties = {"name_as_string" : "tata",
 				"age_as_integer" : 3,
 				"registered_as_datetime" : datetime.datetime.now(),

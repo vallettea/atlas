@@ -20,6 +20,7 @@ Atlas is different from thunderdome in various ways:
 # TODO
 -check if vertex exists before adding
 -implement functions for repetition calls
+- clarify the difference between long and integers
 
 
 
