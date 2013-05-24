@@ -105,7 +105,8 @@ def get_vertex(handler, key, value):
         logger.info("No vertex found.")
     else:
         content = content[0]
-        vertex = Vertex(handler, make_prop(content["_properties"]))
+        label = content["_properties"].pop("label_as_string")
+        vertex = Vertex(handler, label = label, properties = content["_properties"])
         vertex._id = content["_id"]
         return vertex
 
