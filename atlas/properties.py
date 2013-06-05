@@ -27,7 +27,7 @@ class Integer(Property):
         if isinstance(value, Integer):
             self.value = value
         else:
-            self.value = long(value)
+            self.value = value
     def to_python(self):
         return int(self.value)
 
