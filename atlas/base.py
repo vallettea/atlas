@@ -67,8 +67,19 @@ class Vertex(object):
         return self
 
     def execute(self, script, params):
-        params.update({"_id" : self._id})
-        content = self.handler.execute(script, params)
+        dbparams = {}
+        for key, value in params.items():
+            splited = key.split("_as_")
+            if len(splited) == 2:
+                prop_type = splited[-1]
+                Prop = atlas_prop.label_type[prop_type]
+                v = Prop(value)
+                dbparams[key] = v.to_database()
+            else:
+                dbparams[key] = value
+
+        dbparams.update({"_id" : self._id})
+        content = self.handler.execute(script, dbparams)
         return content
 
     def outV(self, label = ""):
