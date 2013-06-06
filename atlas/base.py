@@ -8,12 +8,14 @@ logger = logging.getLogger("atlas")
 
 
 class Atlas(object):
-    def __init__(self, graph_name, hostname, username = None, password = None, batchmode = False):
+    def __init__(self, graph_name, hostname, username = None, password = None, batchmode = False, nb_commit = 1000):
         self.graph_name = graph_name
         self.username = username
         self.password = password
         self.batchmode = batchmode
         self.conn = RexProConnection(hostname, 8184, graph_name)
+        self.nb_commit = nb_commit
+        self.nb_execute = 0
 
         #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 
@@ -24,6 +26,10 @@ class Atlas(object):
 
         try:
             content = self.conn.execute(query, params, isolate = False, transaction = False)
+            self.nb_execute += 1
+            if self.nb_execute == self.nb_commit:
+                self.conn.execute("g.commit()", {}, isolate = False)
+                self.nb_execute = 0
         except:
             logger.info("==========================================================================")
             logger.info(query)
