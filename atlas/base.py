@@ -94,7 +94,10 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            label = content["_properties"].pop("label_as_string")
+            if content["_properties"].has_key("label_as_string"):
+                label = content["_properties"].pop("label_as_string")
+            else:
+                label = None
             vertex = Vertex(self.handler, label = label, properties = content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
