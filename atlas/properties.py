@@ -14,10 +14,14 @@ class Property(object):
     def to_database(self):
         return self.value
 
+    def __repr__(self):
+        return "atlas.Property: %s" % str(self.to_python())
+
 
 
 class String(Property):
-    pass
+    def __repr__(self):
+        return "atlas.String: %s" % str(self.to_python())
 
 Text = String
 
@@ -31,11 +35,17 @@ class Integer(Property):
     def to_python(self):
         return int(self.value)
 
+    def __repr__(self):
+        return "atlas.Integer: %s" % str(self.to_python())
+
 
 class DateTime(Property):
 
     def to_python(self):
-        return datetime.fromtimestamp(float(self.value))
+        if isinstance(self.value, datetime):
+            return self.value
+        else:
+            return datetime.fromtimestamp(float(self.value))
 
     def to_database(self):
         tmp = time_.mktime(self.value.timetuple()) # gives us a float with .0
@@ -43,19 +53,31 @@ class DateTime(Property):
         tmp = tmp + float(self.value.microsecond) / 1000000
         return tmp
 
+    def __repr__(self):
+        return "atlas.DateTime: %s" % str(self.to_python())
+
 class Date(Property):
 
     def to_python(self):
-        return date.fromordinal(self.value)
+        if isinstance(self.value, date):
+            return self.value
+        else:
+            return date.fromordinal(self.value)
 
     def to_database(self):
         tmp = self.value.toordinal()
         return long(tmp)
 
+    def __repr__(self):
+        return "atlas.Date: %s" % str(self.to_python())
+
 class Time(Property):
 
     def to_python(self):
-        return datetime.fromtimestamp(float(self.value)).time()
+        if isinstance(self.value, time):
+            return self.value
+        else:
+            return datetime.fromtimestamp(float(self.value)).time()
 
     def to_database(self):
         since_epoch = datetime.fromtimestamp(time_.mktime(time_.gmtime(0)))
@@ -65,14 +87,23 @@ class Time(Property):
         tmp = tmp + float(self.value.microsecond) / 1000000
         return tmp
 
+    def __repr__(self):
+        return "atlas.Time: %s" % str(self.to_python())
+
 class TimeDelta(Property):
 
     def to_python(self):
-        return timedelta(seconds = float(self.value))
+        if isinstance(self.value, timedelta):
+            return self.value
+        else:
+            return timedelta(seconds = float(self.value))
 
     def to_database(self):
         tmp = self.value.total_seconds()
         return tmp
+
+    def __repr__(self):
+        return "atlas.TimeDelta: %s" % str(self.to_python())
 
 class UUID(Property):
     def __init__(self, value = None):
@@ -86,6 +117,9 @@ class UUID(Property):
     def to_database(self):
         return str(self.value)
 
+    def __repr__(self):
+        return "atlas.UUID: %s" % str(self.to_python())
+
 
 class Boolean(Property):
 
@@ -94,6 +128,9 @@ class Boolean(Property):
 
     def to_database(self):
         return int(self.value)
+
+    def __repr__(self):
+        return "atlas.Boolean: %s" % str(self.to_python())
 
 
 class Double(Property):
@@ -104,6 +141,9 @@ class Double(Property):
     def to_database(self):
         return float(self.value)
 
+    def __repr__(self):
+        return "atlas.Double: %s" % str(self.to_python())
+
 Float = Double
 
 class Decimal(Property):
@@ -113,6 +153,9 @@ class Decimal(Property):
 
     def to_database(self):
         return str(self.value)
+
+    def __repr__(self):
+        return "atlas.Decimal: %s" % str(self.to_python())
 
 
 # dictionnay that makes the correspondance

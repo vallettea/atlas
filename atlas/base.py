@@ -66,6 +66,9 @@ class Vertex(object):
         self.save_query = "g.addVertex(null %s)" % prop_string
         self._id = None
 
+    def __repr__(self):
+        return "atlas.Vertex %s: %s" % (str(self._id), str(self.label))
+
     def save(self):
         params = {k : v.to_database() for k,v in self.properties.items()}
         content = self.handler.execute(self.save_query, params)
@@ -145,6 +148,9 @@ class Edge(object):
             prop_string = ""
         self.save_query = "v1 = g.v(v1_id); v2 = g.v(v2_id); g.addEdge(null, v1, v2, label %s)" % prop_string
         self._id = None
+
+    def __repr__(self):
+        return "atlas.Edge %s: %s" % (str(self._id), str(self.label))
 
     def save(self):
         params = {'v1_id' : self.v1._id, 'v2_id' : self.v2._id, 'label' : self.label}
