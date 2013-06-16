@@ -7,6 +7,22 @@ logger = logging.getLogger("atlas")
 ############### VERTEX ##############
 
 class Vertex(object):
+    """The class representing a node in the graph database.
+
+        Vertex(handler, label=None, properties={})
+        - handler is an atlas instance
+        - label is not compulsory
+        - properties is a dictionnary of the attributes
+
+        example:
+            v = Vertex(atlas, label="user", properties = {"name_as_string" : "toto",
+                                                                                "age_as_integer" : 2,
+                                                                                "registered_as_datetime" : datetime.datetime.now(),
+                                                                                "male_as_boolean" : True,
+                                                                                "income_as_float" : 39009888.3222,
+                                                                                "rate_as_decimal" : 3.2
+                                                                                })
+    """
 
     def __init__(self, handler, label=None, properties={}):
         self.handler = handler
@@ -25,12 +41,20 @@ class Vertex(object):
         return "atlas.Vertex %s: %s" % (str(self._id), str(self.label))
 
     def save(self):
+        """Saves the vertex in the database"""
         params = {k : v.to_database() for k,v in self.properties.items()}
         content = self.handler.execute(self.save_query, params)
         self._id = content["_id"]
         return self
 
     def execute(self, script, params):
+        """Makes a vertex centric query from the vertex
+
+            example:
+            v.execute("g.v(_id).both('friend').toList()", {})
+
+            note that "_id" is automatically added.
+        """
         dbparams = {}
         for key, value in params.items():
             splited = key.split("_as_")
@@ -47,6 +71,7 @@ class Vertex(object):
         return content
 
     def outV(self, label=""):
+        """returns a list of vertex objects pointed at by v"""
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
@@ -62,6 +87,7 @@ class Vertex(object):
         return vertices
 
     def inV(self, label=""):
+        """returns a list of vertex objects pointing to v"""
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
@@ -77,7 +103,16 @@ class Vertex(object):
 ############### EDGE ##############
 
 class Edge(object):
+    """The class representing an edge in the graph database.
 
+        Edge(handler, label=None, properties={})
+        - handler is an atlas instance
+        - label is not compulsory
+        - properties is a dictionnary of the attributes
+
+        example:
+            e = Edge(atlas, v1, v4, "likes", properties = {"how_much_as_integer" : 2})
+    """
     def __init__(self, handler, v1, v2, label, properties={}):
         self.handler = handler
         self.v1 = v1
@@ -95,6 +130,7 @@ class Edge(object):
         return "atlas.Edge %s: %s" % (str(self._id), str(self.label))
 
     def save(self):
+        """Saves the vertex in the database"""
         params = {'v1_id' : self.v1._id, 'v2_id' : self.v2._id, 'label' : self.label}
         params.update({k : v.to_database() for k,v in self.properties.items()})
         content = self.handler.execute(self.save_query, params)
@@ -104,6 +140,7 @@ class Edge(object):
 ############### ATLAS ##############
 
 class Atlas(object):
+    """Atlas is what holds the link to the titan graph database."""
 
     def __init__(self, graph_name, hostname, username=None, password=None, nb_commit=1000):
         self.graph_name = graph_name
@@ -117,7 +154,7 @@ class Atlas(object):
         #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 
     def execute(self, query, params={}):
-
+        """Executes a gremlin command on the database with the given params."""
         try:
             content = self.conn.execute(query, params, isolate=False, transaction=False)
             self.nb_execute += 1
@@ -139,7 +176,7 @@ class Atlas(object):
 # functions
 
 def make_prop(properties):
-        # make properties from given input, the type is labeled after _as_
+        """makes dictionnary of atlas properties from given input dictionnary.Each key must contain the  _as_ keyword."""
         typed_properties = {}
         for key, value in properties.items():
             prop_type = key.split("_as_")[-1]
@@ -150,6 +187,7 @@ def make_prop(properties):
 
 
 def get_vertex_by_id(handler, vid):
+    """Given a _id, returns a vertex object"""
     content = handler.execute("g.v(id)", {"id": " vid})
     if len(content) > 1:
         logger.info("More than one vertex found.")
@@ -164,6 +202,7 @@ def get_vertex_by_id(handler, vid):
 
 
 def get_vertex(handler, key, value):
+    """Vertex lookup: g.V(key, value)"""
     if isinstance(value, basestring):
         content = handler.execute("g.V('%s', '%s')" % (key, value))
     else:
