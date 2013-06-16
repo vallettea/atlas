@@ -18,12 +18,13 @@ class Property(object):
         return "atlas.Property: %s" % str(self.to_python())
 
 
-
 class String(Property):
     def __repr__(self):
         return "atlas.String: %s" % str(self.to_python())
 
+
 Text = String
+
 
 class Integer(Property):
 
@@ -56,6 +57,7 @@ class DateTime(Property):
     def __repr__(self):
         return "atlas.DateTime: %s" % str(self.to_python())
 
+
 class Date(Property):
 
     def to_python(self):
@@ -70,6 +72,7 @@ class Date(Property):
 
     def __repr__(self):
         return "atlas.Date: %s" % str(self.to_python())
+
 
 class Time(Property):
 
@@ -90,6 +93,7 @@ class Time(Property):
     def __repr__(self):
         return "atlas.Time: %s" % str(self.to_python())
 
+
 class TimeDelta(Property):
 
     def to_python(self):
@@ -104,6 +108,7 @@ class TimeDelta(Property):
 
     def __repr__(self):
         return "atlas.TimeDelta: %s" % str(self.to_python())
+
 
 class UUID(Property):
     def __init__(self, value = None):
@@ -144,7 +149,9 @@ class Double(Property):
     def __repr__(self):
         return "atlas.Double: %s" % str(self.to_python())
 
+
 Float = Double
+
 
 class Decimal(Property):
 

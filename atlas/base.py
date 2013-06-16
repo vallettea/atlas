@@ -1,63 +1,18 @@
 import logging
-
 from rexpro import RexProConnection
-
 from atlas import properties as atlas_prop
 
 logger = logging.getLogger("atlas")
 
-
-class Atlas(object):
-    def __init__(self, graph_name, hostname, username = None, password = None, batchmode = False, nb_commit = 1000):
-        self.graph_name = graph_name
-        self.username = username
-        self.password = password
-        self.batchmode = batchmode
-        self.conn = RexProConnection(hostname, 8184, graph_name)
-        self.nb_commit = nb_commit
-        self.nb_execute = 0
-
-        #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
-
-        if self.batchmode:
-            self.execute("bg = new BatchGraph(g, VertexIDType.STRING, 1000) ;")
-
-    def execute(self, query, params = {}):
-
-        try:
-            content = self.conn.execute(query, params, isolate = False, transaction = False)
-            self.nb_execute += 1
-            if self.nb_execute == self.nb_commit:
-                self.conn.execute("g.commit()", {}, isolate = False)
-                self.nb_execute = 0
-        except:
-            logger.info("==========================================================================")
-            logger.info(query)
-            logger.info(params)
-            logger.info("==========================================================================")
-            
-            logger.info("--------->")
-            logger.info(content)
-            logger.info("==========================================================================")
-
-        return content
-
-def make_prop(properties):
-        # make properties from given input, the type is labeled after _as_
-        typed_properties = {}
-        for key, value in properties.items():
-            prop_type = key.split("_as_")[-1]
-            Prop = atlas_prop.label_type[prop_type]
-            v = Prop(value)
-            typed_properties[key] = v
-        return typed_properties
+############### VERTEX ##############
 
 class Vertex(object):
-    def __init__(self, handler, label = None, properties = {}):
+
+    def __init__(self, handler, label=None, properties={}):
         self.handler = handler
         self.label = label
         if label:
-            properties.update({"label_as_string" : label})
+            properties.update({"label_as_string": " label})
         self.properties = make_prop(properties)
         if len(properties.keys()) > 0:
             prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
@@ -87,11 +42,11 @@ class Vertex(object):
             else:
                 dbparams[key] = value
 
-        dbparams.update({"_id" : self._id})
+        dbparams.update({"_id": " self._id})
         content = self.handler.execute(script, dbparams)
         return content
 
-    def outV(self, label = ""):
+    def outV(self, label=""):
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
@@ -106,7 +61,7 @@ class Vertex(object):
             vertices += [vertex]
         return vertices
 
-    def inV(self, label = ""):
+    def inV(self, label=""):
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
@@ -119,24 +74,11 @@ class Vertex(object):
         return vertices
 
 
-def get_vertex(handler, key, value):
-    if isinstance(value, basestring):
-        content = handler.execute("g.V('%s', '%s')" % (key, value))
-    else:
-        content = handler.execute("g.V('%s', %s)" % (key, str(value)))
-    if len(content) > 1:
-        logger.info("More than one vertex found.")
-    elif len(content) == 0:
-        logger.info("No vertex found.")
-    else:
-        content = content[0]
-        label = content["_properties"].pop("label_as_string")
-        vertex = Vertex(handler, label = label, properties = content["_properties"])
-        vertex._id = content["_id"]
-        return vertex
+############### EDGE ##############
 
 class Edge(object):
-    def __init__(self, handler, v1, v2, label, properties = {}):
+
+    def __init__(self, handler, v1, v2, label, properties={}):
         self.handler = handler
         self.v1 = v1
         self.v2 = v2
@@ -159,7 +101,82 @@ class Edge(object):
         self._id = content["_id"]
         return self
 
+############### ATLAS ##############
+
+class Atlas(object):
+
+    def __init__(self, graph_name, hostname, username=None, password=None, nb_commit=1000):
+        self.graph_name = graph_name
+        self.username = username
+        self.password = password
+        self.batchmode = batchmode
+        self.conn = RexProConnection(hostname, 8184, graph_name)
+        self.nb_commit = nb_commit
+        self.nb_execute = 0
+
+        #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
+
+    def execute(self, query, params={}):
+
+        try:
+            content = self.conn.execute(query, params, isolate=False, transaction=False)
+            self.nb_execute += 1
+            if self.nb_execute == self.nb_commit:
+                self.conn.execute("g.commit()", {}, isolate = False)
+                self.nb_execute = 0
+        except:
+            logger.info("==========================================================================")
+            logger.info(query)
+            logger.info(params)
+            logger.info("==========================================================================")
+
+            logger.info("--------->")
+            logger.info(content)
+            logger.info("==========================================================================")
+
+        return content
+
+# functions
+
+def make_prop(properties):
+        # make properties from given input, the type is labeled after _as_
+        typed_properties = {}
+        for key, value in properties.items():
+            prop_type = key.split("_as_")[-1]
+            Prop = atlas_prop.label_type[prop_type]
+            v = Prop(value)
+            typed_properties[key] = v
+        return typed_properties
 
 
+def get_vertex_by_id(handler, vid):
+    content = handler.execute("g.v(id)", {"id": " vid})
+    if len(content) > 1:
+        logger.info("More than one vertex found.")
+    elif len(content) == 0:
+        logger.info("No vertex found.")
+    else:
+        content = content[0]
+        label = content["_properties"].pop("label_as_string")
+        vertex = Vertex(handler, label = label, properties = content["_properties"])
+        vertex._id = content["_id"]
+        return vertex
+
+
+def get_vertex(handler, key, value):
+    if isinstance(value, basestring):
+        content = handler.execute("g.V('%s', '%s')" % (key, value))
+    else:
+        content = handler.execute("g.V('%s', %s)" % (key, str(value)))
+    if len(content) > 1:
+        logger.info("More than one vertex found.")
+    elif len(content) == 0:
+        logger.info("No vertex found.")
+    else:
+        content = content[0]
+        label = content["_properties"].pop("label_as_string")
+        vertex = Vertex(handler, label = label, properties = content["_properties"])
+        vertex._id = content["_id"]
+        return vertex
 
 
