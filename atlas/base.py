@@ -28,7 +28,7 @@ class Vertex(object):
         self.handler = handler
         self.label = label
         if label:
-            properties.update({"label_as_string": " label})
+            properties.update({"label_as_string":  label})
         self.properties = make_prop(properties)
         if len(properties.keys()) > 0:
             prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
@@ -47,8 +47,11 @@ class Vertex(object):
         self._id = content["_id"]
         return self
 
-    def execute(self, script, params):
-        """Makes a vertex centric query from the vertex
+    def execute(self, script, params, as_object = False):
+        """Makes a vertex centric query from the vertex.
+
+            if as_object = False, then the raw result is returned,
+            otherwise, vertex and edge objects are returned.
 
             example:
             v.execute("g.v(_id).both('friend').toList()", {})
@@ -66,12 +69,32 @@ class Vertex(object):
             else:
                 dbparams[key] = value
 
-        dbparams.update({"_id": " self._id})
-        content = self.handler.execute(script, dbparams)
-        return content
+        dbparams.update({"_id":  self._id})
+        contents = self.handler.execute(script, dbparams)
+        if not as_object:
+            return contents
+        else:
+            to_return = []
+            for content in contents:
+                if content["_properties"].has_key("label_as_string"):
+                    label = content["_properties"].pop("label_as_string")
+                else:
+                    label = None
+
+                if content["_type"] == "vertex":
+                    vertex = Vertex(self.handler, label = label, properties = content["_properties"])
+                    vertex._id = content["_id"]
+                    to_return += [vertex]
+                elif content_["_type"] == "edge":
+                    v1 = get_vertex_by_id(self.handler, content_["_outV"])
+                    v2 = get_vertex_by_id(self.handler, content_["_inV"])
+                    edge = Edge(self.handler, v1, v2, label = label, properties = content_["_properties"])
+                    edge._id = content_["_id"]
+                    to_return += [edge]
+            return to_return
 
     def outV(self, label=""):
-        """returns a list of vertex objects pointed at by v"""
+        """returns a list of vertex objects pointed at by v, linked by an edge having label"""
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
@@ -87,13 +110,16 @@ class Vertex(object):
         return vertices
 
     def inV(self, label=""):
-        """returns a list of vertex objects pointing to v"""
+        """returns a list of vertex objects pointing to v, linked by an edge having label"""
         if label != "":
             label = "'" + label + "'"
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            label = content["_properties"].pop("label_as_string")
+            if content["_properties"].has_key("label_as_string"):
+                label = content["_properties"].pop("label_as_string")
+            else:
+                label = None
             vertex = Vertex(self.handler, label = label, properties = content["_properties"])
             vertex._id = content["_id"]
             vertices += [vertex]
@@ -118,6 +144,8 @@ class Edge(object):
         self.v1 = v1
         self.v2 = v2
         self.label = label
+        if label:
+            properties.update({"label_as_string":  label})
         self.properties = make_prop(properties)
         if len(properties.keys()) > 0:
             prop_string = ", [" + ", ".join([k + ":" + k for k in self.properties.keys()]) + "]"
@@ -146,12 +174,9 @@ class Atlas(object):
         self.graph_name = graph_name
         self.username = username
         self.password = password
-        self.batchmode = batchmode
         self.conn = RexProConnection(hostname, 8184, graph_name)
         self.nb_commit = nb_commit
         self.nb_execute = 0
-
-        #self.conn.execute("g.makeType().name('vid').dataType(String.class).unique(Direction.OUT).unique(Direction.IN).indexed(Vertex.class).indexed(Edge.class).makePropertyKey()")
 
     def execute(self, query, params={}):
         """Executes a gremlin command on the database with the given params."""
@@ -162,16 +187,77 @@ class Atlas(object):
                 self.conn.execute("g.commit()", {}, isolate = False)
                 self.nb_execute = 0
         except:
-            logger.info("==========================================================================")
+            logger.info("========================================================================")
             logger.info(query)
             logger.info(params)
-            logger.info("==========================================================================")
-
-            logger.info("--------->")
-            logger.info(content)
-            logger.info("==========================================================================")
-
+            logger.info("========================================================================")
         return content
+
+    def get_vertex_by_id(self, vid):
+        """Given a _id, returns a vertex object"""
+        contents = self.execute("g.v(id)", {"id":  vid})
+        if len(contents) == 0:
+            logger.info("No vertex found.")
+        elif len(contents) > 1:
+            logger.info("More than one vertex found.")
+            content = contents
+        else:
+            content = contents
+        if content["_properties"].has_key("label_as_string"):
+            label = content["_properties"].pop("label_as_string")
+        else:
+            label = None
+        vertex = Vertex(self, label = label, properties = content["_properties"])
+        vertex._id = content["_id"]
+        return vertex
+
+
+    def get_vertex(self, key, value):
+        """Vertex lookup: g.V(key, value)"""
+        if isinstance(value, basestring):
+            contents = self.execute("g.V('%s', '%s')" % (key, value))
+        else:
+            contents = self.execute("g.V('%s', %s)" % (key, str(value)))
+        if len(contents) == 0:
+            logger.info("No vertex found.")
+        elif len(contents) > 1:
+            logger.info("More than one vertex found.")
+            content = contents[0]
+        else:
+            content = contents[0]
+        if content["_properties"].has_key("label_as_string"):
+            label = content["_properties"].pop("label_as_string")
+        else:
+            label = None
+        vertex = Vertex(self, label = label, properties = content["_properties"])
+        vertex._id = content["_id"]
+        return vertex
+
+
+    def get_edge(self, key, value):
+        """Edge lookup: g.E(key, value)"""
+        if isinstance(value, basestring):
+            contents = self.execute("g.E('%s', '%s')" % (key, value))
+        else:
+            contents = self.execute("g.E('%s', %s)" % (key, str(value)))
+        if len(contents) == 0:
+            logger.info("No edge found.")
+        elif len(contents) > 1:
+            logger.info("More than one edge found.")
+            content = contents[0]
+        else:
+            content = contents[0]
+        if content["_properties"].has_key("label_as_string"):
+            label = content["_properties"].pop("label_as_string")
+        else:
+            label = None
+        v1 = self.get_vertex_by_id(content["_outV"])
+        v2 = self.get_vertex_by_id(content["_inV"])
+        edge = Edge(self, v1, v2, label = label, properties = content["_properties"])
+        edge._id = content["_id"]
+        return edge
+
+
 
 # functions
 
@@ -184,38 +270,5 @@ def make_prop(properties):
             v = Prop(value)
             typed_properties[key] = v
         return typed_properties
-
-
-def get_vertex_by_id(handler, vid):
-    """Given a _id, returns a vertex object"""
-    content = handler.execute("g.v(id)", {"id": " vid})
-    if len(content) > 1:
-        logger.info("More than one vertex found.")
-    elif len(content) == 0:
-        logger.info("No vertex found.")
-    else:
-        content = content[0]
-        label = content["_properties"].pop("label_as_string")
-        vertex = Vertex(handler, label = label, properties = content["_properties"])
-        vertex._id = content["_id"]
-        return vertex
-
-
-def get_vertex(handler, key, value):
-    """Vertex lookup: g.V(key, value)"""
-    if isinstance(value, basestring):
-        content = handler.execute("g.V('%s', '%s')" % (key, value))
-    else:
-        content = handler.execute("g.V('%s', %s)" % (key, str(value)))
-    if len(content) > 1:
-        logger.info("More than one vertex found.")
-    elif len(content) == 0:
-        logger.info("No vertex found.")
-    else:
-        content = content[0]
-        label = content["_properties"].pop("label_as_string")
-        vertex = Vertex(handler, label = label, properties = content["_properties"])
-        vertex._id = content["_id"]
-        return vertex
 
 
