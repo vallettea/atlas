@@ -5,7 +5,7 @@ Atlas is aimed to be **lightweight**, **fast** and **generic** interface to Tita
 
 It is based on RexPro protocol and offers multi-sessions possibilities.
 
-It enables to have typed (and rich) data structures associated with graph elements.
+It enables to have typed (and rich) data structures associated with graph elements. That is you can make queries with a rich representation of the properties stored into edges and vertices: in Titan a property representing time will be stored as an integer or a float, which makes queries cumbersome. Atlas lets you query Titan via **gremlin** but with a `DateTime` object for instance.
 
 ## Quick start
 
@@ -31,7 +31,7 @@ All key of properties must contain the key word `_as_` followed by one of the fo
     - float
     - decimal
 
-So for example:
+For example:
 
     from atlas.base import Vertex, Edge
     import datetime
@@ -71,9 +71,42 @@ but make sure you create an index **before adding nodes**:
 
 #### Navigating the graph
 
-    v1.out() #returns all the vertices poinited at by v1
+    v1.out() #returns all the vertices pointed at by v1
     v1.out("likes") # only from edges having the label "likes"
-    
+
+#### Make vertex centric queries
+
+To illustrate vertex centric queries, let us create a simple example (you'll recognize Snips founders):
+
+    alex = Vertex(self.atlas, properties={
+                                        "name_as_string" : "alex", 
+                                        "age_as_integer" : 28
+                                        }).save()
+    rand = Vertex(self.atlas, properties={
+                                        "name_as_string" : "rand", 
+                                        "age_as_integer" : 28
+                                        }).save()
+    mael = Vertex(self.atlas, properties = {
+                                        "name_as_string" : "mael", 
+                                        "age_as_integer" : 31
+                                        }).save()
+    e1 = Edge(self.atlas, alex, rand, "friend", {}).save()
+    e2 = Edge(self.atlas, alex, mael, "friend", {}).save()
+
+write a gremlin query:
+
+    friends_of_friends = """me = g.v(_id)
+                            friends = me.both('friend').toList()
+                            me.both('friend')
+                              .both('friend')
+                              .dedup()
+                              .except([me])
+                              .except(friends)"""
+    result1 = rand.execute(friends_of_friends,  {})
+    result2 = rand.execute(friends_of_friends,  {}, as_object = True)
+
+in `result1` you'll get a raw dictionnary from rexpro and in `result2` it will be a sequence of vertices and edges objects.
+
 ## Differences with thunderdome
 
 Atlas is different from thunderdome in various ways:
@@ -88,12 +121,7 @@ Atlas is different from thunderdome in various ways:
     - properties should respect a *name_of_variable***_as_***type* syntax
     - no auto indices (they have to be defined manually)
 
-# TODO
 
-    -check if vertex exists before adding
-    -implement functions for repetition calls
-    - clarify the difference between long and integers
-    - vertex.as_dict() should return properties in a readable way (use class representation as in django)
 
 
 

@@ -68,7 +68,7 @@ class Date(Property):
 
     def to_database(self):
         tmp = self.value.toordinal()
-        return long(tmp)
+        return tmp
 
     def __repr__(self):
         return "atlas.Date: %s" % str(self.to_python())
