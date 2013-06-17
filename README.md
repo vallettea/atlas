@@ -73,6 +73,7 @@ but make sure you create an index **before adding nodes**:
 
     v1.out() #returns all the vertices poinited at by v1
     v1.out("likes") # only from edges having the label "likes"
+    
 ## Differences with thunderdome
 
 Atlas is different from thunderdome in various ways:

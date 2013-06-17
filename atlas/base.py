@@ -76,21 +76,8 @@ class Vertex(object):
         else:
             to_return = []
             for content in contents:
-                if content["_properties"].has_key("label_as_string"):
-                    label = content["_properties"].pop("label_as_string")
-                else:
-                    label = None
-
-                if content["_type"] == "vertex":
-                    vertex = Vertex(self.handler, label = label, properties = content["_properties"])
-                    vertex._id = content["_id"]
-                    to_return += [vertex]
-                elif content_["_type"] == "edge":
-                    v1 = get_vertex_by_id(self.handler, content_["_outV"])
-                    v2 = get_vertex_by_id(self.handler, content_["_inV"])
-                    edge = Edge(self.handler, v1, v2, label = label, properties = content_["_properties"])
-                    edge._id = content_["_id"]
-                    to_return += [edge]
+                element = self.handler.mk_object_from_result(content)
+                to_return += [element]
             return to_return
 
     def outV(self, label=""):
@@ -100,12 +87,7 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.out(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            if content["_properties"].has_key("label_as_string"):
-                label = content["_properties"].pop("label_as_string")
-            else:
-                label = None
-            vertex = Vertex(self.handler, label = label, properties = content["_properties"])
-            vertex._id = content["_id"]
+            vertex = self.handler.mk_object_from_result(content)
             vertices += [vertex]
         return vertices
 
@@ -116,12 +98,7 @@ class Vertex(object):
         contents = self.handler.execute("v = g.v(%s)\n v.in(%s)" % (self._id, label))
         vertices = []
         for content in contents:
-            if content["_properties"].has_key("label_as_string"):
-                label = content["_properties"].pop("label_as_string")
-            else:
-                label = None
-            vertex = Vertex(self.handler, label = label, properties = content["_properties"])
-            vertex._id = content["_id"]
+            vertex = self.handler.mk_object_from_result(content)
             vertices += [vertex]
         return vertices
 
@@ -203,12 +180,7 @@ class Atlas(object):
             content = contents
         else:
             content = contents
-        if content["_properties"].has_key("label_as_string"):
-            label = content["_properties"].pop("label_as_string")
-        else:
-            label = None
-        vertex = Vertex(self, label = label, properties = content["_properties"])
-        vertex._id = content["_id"]
+        vertex = self.mk_object_from_result(content)
         return vertex
 
 
@@ -225,12 +197,7 @@ class Atlas(object):
             content = contents[0]
         else:
             content = contents[0]
-        if content["_properties"].has_key("label_as_string"):
-            label = content["_properties"].pop("label_as_string")
-        else:
-            label = None
-        vertex = Vertex(self, label = label, properties = content["_properties"])
-        vertex._id = content["_id"]
+        vertex = self.mk_object_from_result(content)
         return vertex
 
 
@@ -247,28 +214,39 @@ class Atlas(object):
             content = contents[0]
         else:
             content = contents[0]
+        edge = self.mk_object_from_result(content)
+        return edge
+
+    def mk_object_from_result(self, content):
+        """makes a vertex or en edge from the raw result dictionnary"""
         if content["_properties"].has_key("label_as_string"):
             label = content["_properties"].pop("label_as_string")
         else:
             label = None
-        v1 = self.get_vertex_by_id(content["_outV"])
-        v2 = self.get_vertex_by_id(content["_inV"])
-        edge = Edge(self, v1, v2, label = label, properties = content["_properties"])
-        edge._id = content["_id"]
-        return edge
+
+        if content["_type"] == "vertex":
+            vertex = Vertex(self, label = label, properties = content["_properties"])
+            vertex._id = content["_id"]
+            return vertex
+        elif content["_type"] == "edge":
+            v1 = self.get_vertex_by_id(content["_outV"])
+            v2 = self.get_vertex_by_id(content["_inV"])
+            edge = Edge(self, v1, v2, label = label, properties = content["_properties"])
+            edge._id = content["_id"]
+            return edge
 
 
-
-# functions
+# helpers
 
 def make_prop(properties):
-        """makes dictionnary of atlas properties from given input dictionnary.Each key must contain the  _as_ keyword."""
-        typed_properties = {}
-        for key, value in properties.items():
-            prop_type = key.split("_as_")[-1]
-            Prop = atlas_prop.label_type[prop_type]
-            v = Prop(value)
-            typed_properties[key] = v
-        return typed_properties
+    """makes dictionnary of atlas properties from given input dictionnary.Each key must contain the  _as_ keyword."""
+    typed_properties = {}
+    for key, value in properties.items():
+        prop_type = key.split("_as_")[-1]
+        Prop = atlas_prop.label_type[prop_type]
+        v = Prop(value)
+        typed_properties[key] = v
+    return typed_properties
+
 
 
