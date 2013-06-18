@@ -163,12 +163,13 @@ class Atlas(object):
             if self.nb_execute == self.nb_commit:
                 self.conn.execute("g.commit()", {}, isolate = False)
                 self.nb_execute = 0
+            return content
         except:
             logger.info("========================================================================")
             logger.info(query)
             logger.info(params)
             logger.info("========================================================================")
-        return content
+
 
     def get_vertex_by_id(self, vid):
         """Given a _id, returns a vertex object"""
