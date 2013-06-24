@@ -60,7 +60,7 @@ class Vertex(object):
         """
         dbparams = {}
         for key, value in params.items():
-            splited = key.split("_as_")
+            splited = key.rsplit('_as_', 1)
             if len(splited) == 2:
                 prop_type = splited[-1]
                 Prop = atlas_prop.label_type[prop_type]
@@ -243,7 +243,7 @@ def make_prop(properties):
     """makes dictionnary of atlas properties from given input dictionnary.Each key must contain the  _as_ keyword."""
     typed_properties = {}
     for key, value in properties.items():
-        prop_type = key.split("_as_")[-1]
+        prop_type = key.rsplit('_as_', 1)
         Prop = atlas_prop.label_type[prop_type]
         v = Prop(value)
         typed_properties[key] = v
