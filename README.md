@@ -1,11 +1,11 @@
 <div style="float: left; margin: 25px; width: 200px;"><img src="figs/atlas.png" /></div>
 
 # Atlas
-Atlas is aimed to be **lightweight**, **fast** and **generic** interface to Titan.
+Atlas is aimed to be a **lightweight**, **fast** and **generic** python interface to Titan.
 
 It is based on RexPro protocol and offers multi-sessions possibilities.
 
-It enables to have typed (and rich) data structures associated with graph elements. That is you can make queries with a rich representation of the properties stored into edges and vertices: in Titan a property representing time will be stored as an integer or a float, which makes queries cumbersome. Atlas lets you query Titan via **gremlin** but with a `DateTime` object for instance.
+It enables to have typed (and rich) data structures associated with graph elements. That is you can make queries with a rich representation of the properties stored into edges and vertices: in Titan a property representing time will be stored as a Long or a float, which makes queries cumbersome. Atlas lets you query Titan via **gremlin** but with a `DateTime` object for instance.
 
 ## Quick start
 
@@ -121,7 +121,9 @@ Atlas is different from thunderdome in various ways:
     - properties should respect a *name_of_variable***_as_***type* syntax
     - no auto indices (they have to be defined manually)
 
+## Contributing
 
+Feel free to contribute to atlas. Please run the unittests before commiting and respect git flow's patterns.
 
 
 
