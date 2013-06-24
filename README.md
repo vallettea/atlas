@@ -88,7 +88,7 @@ To illustrate vertex centric queries, let us create a simple example (you'll rec
                                         }).save()
     mael = Vertex(self.atlas, properties = {
                                         "name_as_string" : "mael", 
-                                        "age_as_integer" : 31
+                                        "age_as_integer" : 29
                                         }).save()
     e1 = Edge(self.atlas, alex, rand, "friend", {}).save()
     e2 = Edge(self.atlas, alex, mael, "friend", {}).save()
