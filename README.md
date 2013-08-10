@@ -15,7 +15,7 @@ It enables to have typed (and rich) data structures associated with graph elemen
 #### Create an Atlas instance and query the database:
 
     from atlas.base import Atlas
-    atlas = Atlas("graph", "localhost")
+    atlas = Atlas("graph", "localhost", 8184)
     atlas.execute("g.V('name', name)", {name : "Alexandre"})
 
 #### Create vertices and edges
