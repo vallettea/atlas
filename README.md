@@ -6,6 +6,9 @@ Atlas is aimed to be a **lightweight**, **fast** and **generic** python interfac
 It is based on RexPro protocol and offers multi-sessions possibilities.
 
 It enables to have typed (and rich) data structures associated with graph elements. That is you can make queries with a rich representation of the properties stored into edges and vertices: in Titan a property representing time will be stored as a Long or a float, which makes queries cumbersome. Atlas lets you query Titan via **gremlin** but with a `DateTime` object for instance.
+## Install
+
+	pip install -e git+git@github.com:snipsco/atlas.git
 
 ## Quick start
 
