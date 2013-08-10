@@ -147,11 +147,11 @@ class Edge(object):
 class Atlas(object):
     """Atlas is what holds the link to the titan graph database."""
 
-    def __init__(self, graph_name, hostname, username=None, password=None, nb_commit=1000):
+    def __init__(self, graph_name, hostname, port, username=None, password=None, nb_commit=1000):
         self.graph_name = graph_name
         self.username = username
         self.password = password
-        self.conn = RexProConnection(hostname, 8184, graph_name)
+        self.conn = RexProConnection(hostname, port, graph_name)
         self.nb_commit = nb_commit
         self.nb_execute = 0
 
